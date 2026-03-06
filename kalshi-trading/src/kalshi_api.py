@@ -40,7 +40,7 @@ class KalshiApi:
         while True:
             params: dict[str, str] = {
                 "series_ticker": SERIES_TICKER,
-                "status": "active",
+                "status": "open",
                 "limit": "200",
             }
             if cursor:

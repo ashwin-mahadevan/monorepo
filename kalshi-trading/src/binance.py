@@ -12,7 +12,7 @@ import websockets.asyncio.client
 
 log = logging.getLogger(__name__)
 
-BINANCE_WS_URL = "wss://stream.binance.com:9443/ws/btcusdt@kline_1s"
+BINANCE_WS_URL = "wss://stream.binance.us:9443/ws/btcusdt@kline_1s"
 RECONNECT_DELAY_MAX = 60.0
 
 

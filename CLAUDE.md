@@ -32,14 +32,20 @@ Each subproject has a `mise.toml` with tasks. Run tasks from within the project 
 mise run <task>
 ```
 
-Or from the monorepo root using namespaced paths:
+Or from the monorepo root using `//subdir:task` (no `run`):
 
 ```bash
-mise run //kalshi-trading:check
-mise run //binance-modeling:run
-mise run //ingest:dev:kalshi-orderbooks
-mise run //agents:dev
-mise run //portfolio:dev
+mise //kalshi-trading:check
+mise //binance-modeling:run
+mise //ingest:dev:kalshi-orderbooks
+mise //agents:dev
+mise //portfolio:dev
+```
+
+Run all tasks of the same name across every project at once:
+
+```bash
+mise //...:check
 ```
 
 Common tasks available in each project: `install`, `build`, `run`, `dev`, `check`, `format`, `format:check`, `lint`, `lint:check`, `typecheck` (where applicable).
@@ -61,7 +67,7 @@ TypeScript pnpm workspace providing data ingestion services for Kalshi and Binan
 
 ### Commands
 
-All commands use `mise run` from within `ingest/` (or `mise run //ingest:<task>` from the monorepo root).
+All commands use `mise run` from within `ingest/` (or `mise //ingest:<task>` from the monorepo root).
 
 ```bash
 mise run install
@@ -108,7 +114,7 @@ Python service for Kalshi binary options trading.
 
 ### Commands
 
-All commands use `mise run` from within `kalshi-trading/` (or `mise run //kalshi-trading:<task>` from the monorepo root).
+All commands use `mise run` from within `kalshi-trading/` (or `mise //kalshi-trading:<task>` from the monorepo root).
 
 ```bash
 mise run install
@@ -125,8 +131,14 @@ mise run run
 
 Standalone Python package (not a uv workspace). Dependencies managed via `pyproject.toml` + `uv.lock`.
 
-- `src/main.py`: Entry point
-- Dependencies: `websockets`, `cryptography`
+- `src/main.py`: Orchestrator — runs 5 concurrent asyncio tasks (Binance stream, Kalshi WS, market refresh, position sync, trading loop)
+- `src/auth.py`: RSA-SHA256 PSS signing for Kalshi WebSocket and REST requests
+- `src/orderbook.py`: Kalshi orderbook state (snapshot + delta application)
+- `src/binance.py`: Binance.US WebSocket 1s kline stream into a rolling price deque
+- `src/pricing.py`: GBM binary option pricing (`gbm_prob`, `estimate_params`)
+- `src/kalshi_api.py`: Kalshi REST client — discovers KXBTCD markets, places orders, syncs positions
+- `src/trader.py`: Edge detection and order sizing logic
+- Dependencies: `websockets`, `cryptography`, `numpy`, `scipy`, `aiohttp`
 
 ## binance-modeling/
 
@@ -134,7 +146,7 @@ Python service for Binance market data modeling. Not deployed — run manually a
 
 ### Commands
 
-All commands use `mise run` from within `binance-modeling/` (or `mise run //binance-modeling:<task>` from the monorepo root).
+All commands use `mise run` from within `binance-modeling/` (or `mise //binance-modeling:<task>` from the monorepo root).
 
 ```bash
 mise run install
