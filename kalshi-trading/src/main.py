@@ -12,25 +12,21 @@ Required env vars:
 """
 
 import asyncio
-import base64
 import json
 import logging
 import os
 import signal
-import time
-from dataclasses import dataclass, field
 
 import websockets
 import websockets.asyncio.client
-from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
+
+from auth import make_auth_headers
+from orderbook import Orderbook
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
 WEBSOCKET_URL = "wss://api.elections.kalshi.com/trade-api/ws/v2"
-WEBSOCKET_PATH = "/trade-api/ws/v2"
 
 
 def require_env(key: str) -> str:
@@ -38,63 +34,6 @@ def require_env(key: str) -> str:
     if not value:
         raise RuntimeError(f"Missing required environment variable: {key}")
     return value
-
-
-def make_auth_headers(kalshi_id: str, private_key_pem: str) -> dict[str, str]:
-    timestamp = str(int(time.time() * 1000))
-    message = (timestamp + "GET" + WEBSOCKET_PATH).encode()
-
-    loaded = serialization.load_pem_private_key(private_key_pem.encode(), password=None)
-    if not isinstance(loaded, RSAPrivateKey):
-        raise RuntimeError("KALSHI_KEY must be an RSA private key")
-    signature = loaded.sign(
-        message,
-        padding.PSS(
-            mgf=padding.MGF1(hashes.SHA256()),
-            salt_length=32,
-        ),
-        hashes.SHA256(),
-    )
-
-    return {
-        "KALSHI-ACCESS-KEY": kalshi_id,
-        "KALSHI-ACCESS-SIGNATURE": base64.b64encode(signature).decode(),
-        "KALSHI-ACCESS-TIMESTAMP": timestamp,
-    }
-
-
-@dataclass
-class Orderbook:
-    """Tracks orderbook state for a single market."""
-
-    ticker: str
-    # price (1-99 cents) -> quantity
-    yes: dict[int, int] = field(default_factory=dict)
-    no: dict[int, int] = field(default_factory=dict)
-    initialized: bool = False
-
-    def apply_snapshot(self, msg: dict) -> None:
-        self.yes = {price: qty for price, qty in msg.get("yes", [])}
-        self.no = {price: qty for price, qty in msg.get("no", [])}
-        self.initialized = True
-
-    def apply_delta(self, msg: dict) -> None:
-        if not self.initialized:
-            raise RuntimeError(f"Delta received before snapshot for ticker {self.ticker!r}")
-        side = self.yes if msg["side"] == "yes" else self.no
-        price: int = msg["price"]
-        delta: int = msg["delta"]
-        new_qty = side.get(price, 0) + delta
-        if new_qty <= 0:
-            side.pop(price, None)
-        else:
-            side[price] = new_qty
-
-    def top_of_book(self) -> tuple[int | None, int | None]:
-        """Returns (best_yes_bid, best_no_bid) in cents."""
-        best_yes = max(self.yes) if self.yes else None
-        best_no = max(self.no) if self.no else None
-        return best_yes, best_no
 
 
 async def run(tickers: list[str], kalshi_id: str, private_key_pem: str) -> None:
