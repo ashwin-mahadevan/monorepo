@@ -6,7 +6,7 @@ export function ApplyButton() {
   const [status, setStatus] = useState<
     "idle" | "loading" | "success" | "error"
   >("idle");
-  const [result, setResult] = useState<string>("");
+  const [result, setResult] = useState("");
 
   async function handleApply() {
     setStatus("loading");
@@ -16,7 +16,7 @@ export function ApplyButton() {
       const data = await res.json();
       if (data.ok) {
         setStatus("success");
-        setResult(`Created ${data.commitsCreated} commits in ${data.repo}`);
+        setResult("Art is being applied — this may take a few minutes.");
       } else {
         setStatus("error");
         setResult(data.error ?? "Unknown error");
@@ -34,10 +34,53 @@ export function ApplyButton() {
         disabled={status === "loading"}
         className="rounded-lg bg-green-600 px-6 py-3 font-medium text-white transition hover:bg-green-500 disabled:opacity-50"
       >
-        {status === "loading" ? "Applying..." : "Apply Art"}
+        {status === "loading" ? "Starting..." : "Apply Art"}
       </button>
       {result && (
-        <p className={status === "success" ? "text-green-400" : "text-red-400"}>
+        <p className={status === "success" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
+          {result}
+        </p>
+      )}
+    </div>
+  );
+}
+
+export function RemoveButton() {
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
+  const [result, setResult] = useState("");
+
+  async function handleRemove() {
+    setStatus("loading");
+    setResult("");
+    try {
+      const res = await fetch("/api/remove", { method: "POST" });
+      const data = await res.json();
+      if (data.ok) {
+        setStatus("success");
+        setResult("Repository is being removed.");
+      } else {
+        setStatus("error");
+        setResult(data.error ?? "Unknown error");
+      }
+    } catch (err) {
+      setStatus("error");
+      setResult(err instanceof Error ? err.message : "Request failed");
+    }
+  }
+
+  return (
+    <div className="space-y-3">
+      <button
+        onClick={handleRemove}
+        disabled={status === "loading"}
+        className="rounded-lg bg-red-600 px-6 py-3 font-medium text-white transition hover:bg-red-500 disabled:opacity-50"
+      >
+        {status === "loading" ? "Removing..." : "Remove Art"}
+      </button>
+      {result && (
+        <p className={status === "success" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
           {result}
         </p>
       )}

@@ -15,7 +15,7 @@ export async function POST() {
 
   const baseUrl = process.env.NEXT_PUBLIC_URL ?? "http://localhost:3000";
   const { workflowRunId } = await client.trigger({
-    url: `${baseUrl}/api/workflows/apply`,
+    url: `${baseUrl}/api/workflows/remove`,
     body: { accessToken: user.accessToken },
   });
 

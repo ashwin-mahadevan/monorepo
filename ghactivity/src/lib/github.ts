@@ -139,6 +139,20 @@ export async function getOrCreateRepo(
   return { owner, repo: repoName };
 }
 
+export async function deleteRepo(
+  token: string,
+  owner: string,
+  repo: string,
+): Promise<void> {
+  const res = await ghFetch(token, `/repos/${owner}/${repo}`, {
+    method: "DELETE",
+  });
+  if (!res.ok && res.status !== 404) {
+    const body = await res.text();
+    throw new Error(`Failed to delete repo: ${res.status} ${body}`);
+  }
+}
+
 async function git(
   cwd: string,
   args: string[],

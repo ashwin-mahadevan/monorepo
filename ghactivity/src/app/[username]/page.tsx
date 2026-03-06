@@ -1,7 +1,7 @@
 import { getSessionUser } from "@/lib/session";
 import { getContributionGraph } from "@/lib/github";
 import { ArtPreview } from "@/components/art-preview";
-import { ApplyButton, LogoutButton } from "./client";
+import { ApplyButton, RemoveButton, LogoutButton } from "./client";
 import { redirect } from "next/navigation";
 
 export default async function UserPage({
@@ -49,7 +49,10 @@ export default async function UserPage({
           <ArtPreview contributions={contributions} />
         </div>
 
-        <ApplyButton />
+        <div className="flex gap-4">
+          <ApplyButton />
+          <RemoveButton />
+        </div>
       </div>
     </div>
   );
