@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/session";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { users } from "@/db/schema";
 import { applyArt, getOrCreateRepo } from "@/lib/github";
 import { getCommitDates, PRESET_PATTERN } from "@/lib/art";
@@ -14,7 +14,7 @@ export async function POST() {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const user = await db.query.users.findFirst({
+  const user = await getDb().query.users.findFirst({
     where: eq(users.id, session.userId),
   });
   if (!user) {

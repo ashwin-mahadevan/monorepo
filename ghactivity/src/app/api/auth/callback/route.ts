@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { eq } from "drizzle-orm";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { users } from "@/db/schema";
 import { getSession } from "@/lib/session";
 import { getUser } from "@/lib/github";
@@ -39,13 +39,13 @@ export async function GET(request: NextRequest) {
   const ghUser = await getUser(accessToken);
 
   // Upsert user in DB
-  const existing = await db.query.users.findFirst({
+  const existing = await getDb().query.users.findFirst({
     where: eq(users.githubId, ghUser.id),
   });
 
   let userId: number;
   if (existing) {
-    await db
+    await getDb()
       .update(users)
       .set({
         username: ghUser.login,
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
       .where(eq(users.githubId, ghUser.id));
     userId = existing.id;
   } else {
-    const result = await db.insert(users).values({
+    const result = await getDb().insert(users).values({
       githubId: ghUser.id,
       username: ghUser.login,
       avatarUrl: ghUser.avatar_url,
