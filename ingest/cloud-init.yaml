@@ -27,11 +27,11 @@ packages:
 fs_setup:
   - label: ingest-data
     filesystem: ext4
-    device: /dev/disk/by-id/scsi-0HC_Volume_104640663
+    device: /dev/disk/by-id/scsi-0HC_Volume_105002415
     overwrite: false
 
 mounts:
-  - ["/dev/disk/by-id/scsi-0HC_Volume_104640663", "/home/ingest/data", "ext4", "defaults,nofail", "0", "2"]
+  - ["/dev/disk/by-id/scsi-0HC_Volume_105002415", "/home/ingest/data", "ext4", "defaults,nofail", "0", "2"]
 
 runcmd:
   - chown -R ingest:ingest /home/ingest
