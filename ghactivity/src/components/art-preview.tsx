@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { getCommitDates, PRESET_PATTERN } from "@/lib/art";
 
 // GitHub contribution graph colors by intensity level (0-4)
@@ -51,12 +52,23 @@ interface ArtPreviewProps {
 }
 
 export function ArtPreview({ contributions }: ArtPreviewProps) {
+  const [showArt, setShowArt] = useState(true);
   const months = getMonthLabels();
   const gridWidth = 52 * (CELL_SIZE + CELL_GAP);
   const gridHeight = 7 * (CELL_SIZE + CELL_GAP);
 
   return (
-    <div className="overflow-x-auto">
+    <div className="space-y-3">
+      <label className="flex items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          checked={showArt}
+          onChange={(e) => setShowArt(e.target.checked)}
+          className="accent-green-600"
+        />
+        <span className="text-gray-600 dark:text-gray-400">Show art preview</span>
+      </label>
+      <div className="overflow-x-auto">
       <svg
         width={LABEL_WIDTH + gridWidth}
         height={HEADER_HEIGHT + gridHeight}
@@ -96,9 +108,8 @@ export function ArtPreview({ contributions }: ArtPreviewProps) {
         {/* Grid cells */}
         {Array.from({ length: 52 }, (_, col) =>
           Array.from({ length: 7 }, (_, row) => {
-            const artActive = PRESET_PATTERN[row][col];
+            const artActive = showArt && PRESET_PATTERN[row][col];
             const existing = contributions?.[row]?.[col] ?? 0;
-            // Art overlay: use max intensity (4) for art cells, otherwise show existing
             const level = artActive ? 4 : existing;
 
             return (
@@ -128,6 +139,7 @@ export function ArtPreview({ contributions }: ArtPreviewProps) {
           :root.dark .gh-cell-4 { fill: ${COLORS_DARK[4]}; }
         `}</style>
       </svg>
+      </div>
     </div>
   );
 }
