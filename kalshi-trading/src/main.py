@@ -73,12 +73,12 @@ class Orderbook:
     no: dict[int, int] = field(default_factory=dict)
     initialized: bool = False
 
-    def apply_snapshot(self, msg: dict) -> None:  # type: ignore[type-arg]
+    def apply_snapshot(self, msg: dict) -> None:
         self.yes = {price: qty for price, qty in msg.get("yes", [])}
         self.no = {price: qty for price, qty in msg.get("no", [])}
         self.initialized = True
 
-    def apply_delta(self, msg: dict) -> None:  # type: ignore[type-arg]
+    def apply_delta(self, msg: dict) -> None:
         if not self.initialized:
             raise RuntimeError(f"Delta received before snapshot for ticker {self.ticker!r}")
         side = self.yes if msg["side"] == "yes" else self.no
