@@ -16,9 +16,7 @@ export function ApplyButton() {
       const data = await res.json();
       if (data.ok) {
         setStatus("success");
-        setResult(
-          `Created ${data.commitsCreated} commits in ${data.repo}`,
-        );
+        setResult(`Created ${data.commitsCreated} commits in ${data.repo}`);
       } else {
         setStatus("error");
         setResult(data.error ?? "Unknown error");
@@ -39,11 +37,7 @@ export function ApplyButton() {
         {status === "loading" ? "Applying..." : "Apply Art"}
       </button>
       {result && (
-        <p
-          className={
-            status === "success" ? "text-green-400" : "text-red-400"
-          }
-        >
+        <p className={status === "success" ? "text-green-400" : "text-red-400"}>
           {result}
         </p>
       )}

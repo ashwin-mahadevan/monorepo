@@ -53,9 +53,7 @@
       "indexes": {
         "users_github_id_unique": {
           "name": "users_github_id_unique",
-          "columns": [
-            "github_id"
-          ],
+          "columns": ["github_id"],
           "isUnique": true
         }
       },
