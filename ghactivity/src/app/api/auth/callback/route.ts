@@ -1,8 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { eq } from "drizzle-orm";
-import { getDb } from "@/lib/db";
+import { db } from "@/lib/db";
 import { users } from "@/db/schema";
-import { getSession } from "@/lib/session";
+import { createSession } from "@/lib/session";
 import { getUser } from "@/lib/github";
 
 export async function GET(request: NextRequest) {
@@ -39,13 +39,13 @@ export async function GET(request: NextRequest) {
   const ghUser = await getUser(accessToken);
 
   // Upsert user in DB
-  const existing = await getDb().query.users.findFirst({
+  const existing = await db.query.users.findFirst({
     where: eq(users.githubId, ghUser.id),
   });
 
   let userId: number;
   if (existing) {
-    await getDb()
+    await db
       .update(users)
       .set({
         username: ghUser.login,
@@ -55,22 +55,19 @@ export async function GET(request: NextRequest) {
       .where(eq(users.githubId, ghUser.id));
     userId = existing.id;
   } else {
-    const result = await getDb().insert(users).values({
-      githubId: ghUser.id,
-      username: ghUser.login,
-      avatarUrl: ghUser.avatar_url,
-      accessToken,
-    });
-    userId = Number(result.lastInsertRowid);
+    const [inserted] = await db
+      .insert(users)
+      .values({
+        githubId: ghUser.id,
+        username: ghUser.login,
+        avatarUrl: ghUser.avatar_url,
+        accessToken,
+      })
+      .returning({ id: users.id });
+    userId = inserted.id;
   }
 
-  // Create session
-  const session = await getSession();
-  session.userId = userId;
-  session.githubUsername = ghUser.login;
-  session.avatarUrl = ghUser.avatar_url;
-  session.accessToken = accessToken;
-  await session.save();
+  await createSession(userId);
 
   const baseUrl = process.env.NEXT_PUBLIC_URL ?? "http://localhost:3000";
   return NextResponse.redirect(baseUrl);

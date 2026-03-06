@@ -1,12 +1,18 @@
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
-export const users = sqliteTable("users", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const users = pgTable("users", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   githubId: integer("github_id").notNull().unique(),
   username: text("username").notNull(),
   avatarUrl: text("avatar_url").notNull(),
   accessToken: text("access_token").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const sessions = pgTable("sessions", {
+  token: text("token").primaryKey(),
+  userId: integer("user_id")
     .notNull()
-    .$defaultFn(() => new Date()),
+    .references(() => users.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });

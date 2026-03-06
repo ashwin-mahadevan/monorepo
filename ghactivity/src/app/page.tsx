@@ -1,10 +1,9 @@
-import { getSession } from "@/lib/session";
+import { getSessionUser } from "@/lib/session";
 import { ArtPreview } from "@/components/art-preview";
 import { ApplyButton, LogoutButton } from "./client";
 
 export default async function Home() {
-  const session = await getSession();
-  const loggedIn = !!session.userId;
+  const user = await getSessionUser();
 
   return (
     <div className="space-y-8">
@@ -15,16 +14,16 @@ export default async function Home() {
         </p>
       </div>
 
-      {loggedIn ? (
+      {user ? (
         <div className="space-y-6">
           <div className="flex items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={session.avatarUrl}
-              alt={session.githubUsername}
+              src={user.avatarUrl}
+              alt={user.username}
               className="h-10 w-10 rounded-full"
             />
-            <span className="font-medium">{session.githubUsername}</span>
+            <span className="font-medium">{user.username}</span>
             <LogoutButton />
           </div>
 
