@@ -12,6 +12,8 @@ Commit every logical change atomically so that `git log` stays clean and any cha
 
 Use the `/git-commit` skill when committing. It defines the canonical workflow and must be followed every time without exception.
 
+When deleting files, use `rm` (not `git rm`). Staging is a separate concern handled by `git add` inside the skill invocation.
+
 ## Architecture
 
 This is a monorepo containing:
