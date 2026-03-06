@@ -11,6 +11,7 @@ python.uv_venv_auto = "create|source"
 config_roots = [
 	"agents",
 	"binance-modeling",
+	"ghactivity",
 	"ingest",
 	"kalshi-trading",
 	"portfolio",

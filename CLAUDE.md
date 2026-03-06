@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Always use shared project configurations (stored in git) rather than personal settings unless explicitly told otherwise.
 
+The Bash working directory should stay at the monorepo root. Use relative paths instead of `cd`. If a command changes the working directory (e.g. `pnpm install` inside a subdir), `cd` back to the monorepo root afterward.
+
 ## Version Control
 
 Commit every logical change atomically so that `git log` stays clean and any change can be cleanly reverted with `git revert`. Do not bundle unrelated changes into a single commit, and do not leave a series of changes uncommitted until the end of a task.
