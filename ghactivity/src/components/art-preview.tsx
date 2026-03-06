@@ -49,9 +49,11 @@ const HEADER_HEIGHT = 15;
 interface ArtPreviewProps {
   /** Existing contribution grid: 7 rows × 52 cols, values 0-4. */
   contributions?: number[][];
+  /** Whether the ghactivity repo currently exists (art is applied). */
+  artApplied?: boolean;
 }
 
-export function ArtPreview({ contributions }: ArtPreviewProps) {
+export function ArtPreview({ contributions, artApplied }: ArtPreviewProps) {
   const [showArt, setShowArt] = useState(true);
   const months = getMonthLabels();
   const gridWidth = 52 * (CELL_SIZE + CELL_GAP);
@@ -59,15 +61,26 @@ export function ArtPreview({ contributions }: ArtPreviewProps) {
 
   return (
     <div className="space-y-3">
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={showArt}
-          onChange={(e) => setShowArt(e.target.checked)}
-          className="accent-green-600"
-        />
-        <span className="text-gray-600 dark:text-gray-400">Show art preview</span>
-      </label>
+      <div className="flex items-center gap-4">
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={showArt}
+            onChange={(e) => setShowArt(e.target.checked)}
+            className="accent-green-600"
+          />
+          <span className="text-gray-600 dark:text-gray-400">Show art preview</span>
+        </label>
+        <span
+          className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+            artApplied
+              ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
+              : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
+          }`}
+        >
+          {artApplied ? "Art applied" : "Art not applied"}
+        </span>
+      </div>
       <div className="overflow-x-auto">
       <svg
         width={LABEL_WIDTH + gridWidth}
@@ -108,9 +121,14 @@ export function ArtPreview({ contributions }: ArtPreviewProps) {
         {/* Grid cells */}
         {Array.from({ length: 52 }, (_, col) =>
           Array.from({ length: 7 }, (_, row) => {
-            const artActive = showArt && PRESET_PATTERN[row][col];
+            const isArtCell = PRESET_PATTERN[row][col];
             const existing = contributions?.[row]?.[col] ?? 0;
-            const level = artActive ? 4 : existing;
+            // When art overlay is on: art cells show at level 4.
+            // When art overlay is off: art cells show as 0 so the user sees
+            // the graph without art regardless of GitHub's caching delay.
+            const level = isArtCell
+              ? showArt ? 4 : 0
+              : existing;
 
             return (
               <rect

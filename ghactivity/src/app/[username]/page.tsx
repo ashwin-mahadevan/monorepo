@@ -1,5 +1,5 @@
 import { getSessionUser } from "@/lib/session";
-import { getContributionGraph } from "@/lib/github";
+import { getContributionGraph, repoExists } from "@/lib/github";
 import { ArtPreview } from "@/components/art-preview";
 import { ApplyButton, RemoveButton, LogoutButton } from "./client";
 import { redirect } from "next/navigation";
@@ -16,12 +16,10 @@ export default async function UserPage({
     redirect("/");
   }
 
-  let contributions: number[][] | undefined;
-  try {
-    contributions = await getContributionGraph(user.accessToken, user.username);
-  } catch {
-    // Fall back to empty grid if fetch fails
-  }
+  const [contributions, artApplied] = await Promise.all([
+    getContributionGraph(user.accessToken, user.username).catch(() => undefined),
+    repoExists(user.accessToken, user.username, "ghactivity"),
+  ]);
 
   return (
     <div className="space-y-8">
@@ -46,7 +44,7 @@ export default async function UserPage({
 
         <div>
           <h2 className="mb-3 text-lg font-semibold">Preview</h2>
-          <ArtPreview contributions={contributions} />
+          <ArtPreview contributions={contributions} artApplied={artApplied} />
         </div>
 
         <div className="flex gap-4">

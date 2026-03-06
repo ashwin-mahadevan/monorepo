@@ -139,6 +139,15 @@ export async function getOrCreateRepo(
   return { owner, repo: repoName };
 }
 
+export async function repoExists(
+  token: string,
+  owner: string,
+  repo: string,
+): Promise<boolean> {
+  const res = await ghFetch(token, `/repos/${owner}/${repo}`);
+  return res.ok;
+}
+
 export async function deleteRepo(
   token: string,
   owner: string,
