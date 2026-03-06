@@ -149,8 +149,8 @@ jobs:
           script: |
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             cd /home/ingest
-            IMAGE_TAG=${{ github.sha }} docker compose -f ingest/compose.yaml pull
-            IMAGE_TAG=${{ github.sha }} docker compose -f ingest/compose.yaml up -d --remove-orphans --no-build
+            IMAGE_TAG=${{ github.sha }} docker compose -f ingest/compose.yaml --env-file .env pull
+            IMAGE_TAG=${{ github.sha }} docker compose -f ingest/compose.yaml --env-file .env up -d --remove-orphans --no-build
 
   deploy-trading:
     runs-on: ubuntu-latest
@@ -177,5 +177,5 @@ jobs:
           script: |
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             cd /home/trading
-            IMAGE_TAG=${{ github.sha }} docker compose -f kalshi-trading/compose.yaml pull
-            IMAGE_TAG=${{ github.sha }} docker compose -f kalshi-trading/compose.yaml up -d --remove-orphans --no-build
+            IMAGE_TAG=${{ github.sha }} docker compose -f kalshi-trading/compose.yaml --env-file .env pull
+            IMAGE_TAG=${{ github.sha }} docker compose -f kalshi-trading/compose.yaml --env-file .env up -d --remove-orphans --no-build
