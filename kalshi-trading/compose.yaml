@@ -9,3 +9,8 @@ services:
     environment:
       KALSHI_ID: ${KALSHI_ID:?required}
       KALSHI_KEY: ${KALSHI_KEY:?required}
+      DRY_RUN: ${DRY_RUN:-true}
+      MIN_EDGE: ${MIN_EDGE:-0.05}
+      MAX_POSITION_PER_MARKET: ${MAX_POSITION_PER_MARKET:-100}
+      MAX_ORDER_SIZE: ${MAX_ORDER_SIZE:-10}
+      WINDOW_SIZE: ${WINDOW_SIZE:-86400}
