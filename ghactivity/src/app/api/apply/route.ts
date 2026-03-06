@@ -21,7 +21,7 @@ export async function POST() {
 
   return NextResponse.json({
     ok: true,
-    commitsCreated: dates.length,
+    commitsCreated: dates.length * 30,
     repo: `https://github.com/${owner}/${repo}`,
   });
 }

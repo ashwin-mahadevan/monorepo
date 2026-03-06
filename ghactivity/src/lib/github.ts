@@ -1,4 +1,15 @@
+import { execFile } from "node:child_process";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { promisify } from "node:util";
+
+const execFileAsync = promisify(execFile);
+
 const API = "https://api.github.com";
+
+/** Commits per filled cell — enough to dominate real activity. */
+const COMMITS_PER_CELL = 30;
 
 interface GitHubUser {
   id: number;
@@ -57,103 +68,58 @@ export async function getOrCreateRepo(
   return { owner, repo: repoName };
 }
 
+async function git(
+  cwd: string,
+  args: string[],
+  env?: Record<string, string>,
+): Promise<string> {
+  const { stdout } = await execFileAsync("git", args, {
+    cwd,
+    env: { ...process.env, ...env },
+  });
+  return stdout.trim();
+}
+
 export async function applyArt(
   token: string,
   owner: string,
   repo: string,
   dates: Date[],
 ): Promise<void> {
-  // Get or create default branch ref
-  let ref = await ghFetch(token, `/repos/${owner}/${repo}/git/ref/heads/main`);
-  if (!ref.ok) {
-    // Try master
-    ref = await ghFetch(token, `/repos/${owner}/${repo}/git/ref/heads/master`);
+  const tmpDir = await mkdtemp(join(tmpdir(), "ghactivity-"));
+
+  try {
+    const remoteUrl = `https://x-access-token:${token}@github.com/${owner}/${repo}.git`;
+    const email = `${owner}@users.noreply.github.com`;
+
+    await git(tmpDir, ["init"]);
+    await git(tmpDir, ["remote", "add", "origin", remoteUrl]);
+    await git(tmpDir, ["config", "user.name", owner]);
+    await git(tmpDir, ["config", "user.email", email]);
+
+    // Sort dates chronologically
+    const sorted = [...dates].sort((a, b) => a.getTime() - b.getTime());
+
+    // Create initial file so we have something to commit against
+    const artFile = join(tmpDir, "art.txt");
+    let counter = 0;
+
+    for (const date of sorted) {
+      const isoDate = date.toISOString();
+      const dateEnv = {
+        GIT_AUTHOR_DATE: isoDate,
+        GIT_COMMITTER_DATE: isoDate,
+      };
+
+      for (let i = 0; i < COMMITS_PER_CELL; i++) {
+        await writeFile(artFile, `ghactivity ${counter++}\n`);
+        await git(tmpDir, ["add", "art.txt"]);
+        await git(tmpDir, ["commit", "-m", `art ${isoDate} #${i}`], dateEnv);
+      }
+    }
+
+    await git(tmpDir, ["push", "--force", "origin", "HEAD:main"]);
+  } finally {
+    await rm(tmpDir, { recursive: true, force: true });
   }
-  if (!ref.ok) throw new Error("Could not find default branch ref");
-
-  const refData = await ref.json();
-  let currentSha: string = refData.object.sha;
-  const refPath: string = refData.ref;
-
-  // Get the tree of the current commit
-  const commitRes = await ghFetch(
-    token,
-    `/repos/${owner}/${repo}/git/commits/${currentSha}`,
-  );
-  if (!commitRes.ok) throw new Error("Could not get current commit");
-  const commitData = await commitRes.json();
-  const treeSha: string = commitData.tree.sha;
-
-  // Create chained commits for each date
-  for (const date of dates) {
-    const isoDate = date.toISOString();
-    const message = `ghactivity art commit ${isoDate}`;
-
-    // Create a blob with unique content per commit
-    const blobRes = await ghFetch(token, `/repos/${owner}/${repo}/git/blobs`, {
-      method: "POST",
-      body: JSON.stringify({
-        content: `ghactivity ${isoDate}\n`,
-        encoding: "utf-8",
-      }),
-    });
-    if (!blobRes.ok) throw new Error("Failed to create blob");
-    const blobData = await blobRes.json();
-
-    // Create a tree with the blob
-    const treeRes = await ghFetch(token, `/repos/${owner}/${repo}/git/trees`, {
-      method: "POST",
-      body: JSON.stringify({
-        base_tree: treeSha,
-        tree: [
-          {
-            path: `art/${date.getTime()}.txt`,
-            mode: "100644",
-            type: "blob",
-            sha: blobData.sha,
-          },
-        ],
-      }),
-    });
-    if (!treeRes.ok) throw new Error("Failed to create tree");
-    const treeData = await treeRes.json();
-
-    // Create a commit with the backdated author date
-    const newCommitRes = await ghFetch(
-      token,
-      `/repos/${owner}/${repo}/git/commits`,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          message,
-          tree: treeData.sha,
-          parents: [currentSha],
-          author: {
-            name: owner,
-            email: `${owner}@users.noreply.github.com`,
-            date: isoDate,
-          },
-          committer: {
-            name: owner,
-            email: `${owner}@users.noreply.github.com`,
-            date: isoDate,
-          },
-        }),
-      },
-    );
-    if (!newCommitRes.ok) throw new Error("Failed to create commit");
-    const newCommitData = await newCommitRes.json();
-    currentSha = newCommitData.sha;
-  }
-
-  // Update the ref to point to the last commit
-  const updateRef = await ghFetch(
-    token,
-    `/repos/${owner}/${repo}/git/${refPath}`,
-    {
-      method: "PATCH",
-      body: JSON.stringify({ sha: currentSha }),
-    },
-  );
-  if (!updateRef.ok) throw new Error("Failed to update ref");
 }
