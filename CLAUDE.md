@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Always use shared project configurations (stored in git) rather than personal settings unless explicitly told otherwise.
 
-The Bash working directory should stay at the monorepo root. Use relative paths instead of `cd`. If a command changes the working directory (e.g. `pnpm install` inside a subdir), `cd` back to the monorepo root afterward.
+The Bash working directory should stay at the monorepo root. Use relative paths instead of `cd`. Do not use compound commands like `cd subdir && command`; instead, run subdir commands from the root (e.g. `pnpm --dir ghactivity run typecheck`). If a command unavoidably changes the working directory, run a separate follow-up `cd` back to the monorepo root.
 
 ## Version Control
 
