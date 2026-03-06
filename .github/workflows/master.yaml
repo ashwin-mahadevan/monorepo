@@ -134,21 +134,21 @@ jobs:
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ vars.INGEST_DEPLOY_HOST }}
-          username: deploy
+          username: ingest
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           port: 22
           source: ingest/compose.yaml
-          target: /home/deploy
+          target: /home/ingest
       - name: Deploy
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ vars.INGEST_DEPLOY_HOST }}
-          username: deploy
+          username: ingest
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           port: 22
           script: |
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            cd /home/deploy
+            cd /home/ingest
             IMAGE_TAG=${{ github.sha }} docker compose -f ingest/compose.yaml pull
             IMAGE_TAG=${{ github.sha }} docker compose -f ingest/compose.yaml up -d --remove-orphans --no-build
 
@@ -162,20 +162,20 @@ jobs:
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ vars.TRADING_DEPLOY_HOST }}
-          username: deploy
+          username: trading
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           port: 22
           source: kalshi-trading/compose.yaml
-          target: /home/deploy
+          target: /home/trading
       - name: Deploy
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ vars.TRADING_DEPLOY_HOST }}
-          username: deploy
+          username: trading
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           port: 22
           script: |
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            cd /home/deploy
+            cd /home/trading
             IMAGE_TAG=${{ github.sha }} docker compose -f kalshi-trading/compose.yaml pull
             IMAGE_TAG=${{ github.sha }} docker compose -f kalshi-trading/compose.yaml up -d --remove-orphans --no-build

@@ -15,7 +15,7 @@ RUN apt-get update \
 
 RUN curl https://mise.run | sh
 
-COPY mise.toml ./
+COPY ingest/mise.toml ./mise.toml
 
 RUN mise trust \
   && mise install

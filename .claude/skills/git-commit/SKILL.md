@@ -1,7 +1,7 @@
 ---
 name: git-commit
 description: Stage and commit changes with a structured message. Use after making atomic code changes.
-disable-model-invocation: true
+disable-model-invocation: false
 allowed-tools: Bash
 ---
 
