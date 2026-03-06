@@ -1,0 +1,27 @@
+{
+  "name": "@firm/workspace",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm --recursive --filter='!@firm/workspace' build",
+    "typecheck": "pnpm --recursive --filter='!@firm/workspace' typecheck",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint --fix .",
+    "lint:check": "eslint .",
+    "check": "pnpm format:check && pnpm lint:check && pnpm typecheck"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@typescript-eslint/eslint-plugin": "^8.56.1",
+    "@typescript-eslint/parser": "^8.56.1",
+    "eslint": "^10.0.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "globals": "^17.3.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.8.3"
+  },
+  "packageManager": "pnpm@10.0.0"
+}

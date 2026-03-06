@@ -1,0 +1,66 @@
+name: merge
+
+on:
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  checks-python:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - binance-modeling
+          - kalshi-trading
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v3
+        with:
+          install: true
+          cache: true
+      - name: Install dependencies
+        run: mise exec -- uv sync --frozen --all-groups
+        working-directory: ${{ matrix.service }}
+      - name: Format
+        run: mise exec -- uv run --frozen ruff format --check src
+        working-directory: ${{ matrix.service }}
+      - name: Lint
+        run: mise exec -- uv run --frozen ruff check src
+        working-directory: ${{ matrix.service }}
+      - name: Typecheck
+        run: mise exec -- uv run --frozen mypy src
+        working-directory: ${{ matrix.service }}
+
+  checks-typescript:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - common
+          - binance/archive
+          - kalshi/orderbooks
+          - kalshi/trades
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v3
+        with:
+          install: true
+          cache: true
+          experimental: true
+      - name: Install dependencies
+        run: mise exec -- pnpm install --frozen-lockfile
+        working-directory: ingest
+      - name: Type check
+        run: mise exec -- pnpm --filter @firm/$(basename ${{ matrix.service }}) typecheck
+        working-directory: ingest
+      - name: Format check
+        run: mise exec -- pnpm prettier --check ${{ matrix.service }}
+        working-directory: ingest
+      - name: Lint check
+        run: mise exec -- pnpm eslint ${{ matrix.service }}
+        working-directory: ingest

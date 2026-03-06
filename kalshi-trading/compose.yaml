@@ -1,0 +1,11 @@
+services:
+  kalshi-trading:
+    image: ghcr.io/ashwin-mahadevan/monorepo/kalshi-trading:${IMAGE_TAG:-latest}
+    build:
+      context: ..
+      dockerfile: kalshi-trading/Dockerfile
+    init: true
+    restart: unless-stopped
+    environment:
+      KALSHI_ID: ${KALSHI_ID:?required}
+      KALSHI_KEY: ${KALSHI_KEY:?required}

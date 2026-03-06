@@ -1,0 +1,27 @@
+[tools]
+python = "3.14.3"
+uv = "0.10.8"
+
+[tasks.install]
+run = "uv sync --frozen --all-groups"
+
+[tasks.run]
+run = "uv run --frozen python src/main.py"
+
+[tasks."format:check"]
+run = "uv run --frozen ruff format --check src"
+
+[tasks.format]
+run = "uv run --frozen ruff format src"
+
+[tasks."lint:check"]
+run = "uv run --frozen ruff check src"
+
+[tasks.lint]
+run = "uv run --frozen ruff check --fix src"
+
+[tasks.typecheck]
+run = "uv run --frozen mypy src"
+
+[tasks.check]
+depends = ["format:check", "lint:check", "typecheck"]

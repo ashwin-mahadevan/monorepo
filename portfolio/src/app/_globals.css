@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+@import "@radix-ui/colors/mauve.css";
+@import "@radix-ui/colors/mauve-dark.css";
+
+@theme {
+  /* Grayscale */
+  --color-mauve-base: var(--mauve-1);
+  --color-mauve-base-subtle: var(--mauve-2);
+  --color-mauve-ui: var(--mauve-3);
+  --color-mauve-ui-hover: var(--mauve-4);
+  --color-mauve-ui-active: var(--mauve-5);
+  --color-mauve-line: var(--mauve-6);
+  --color-mauve-border: var(--mauve-7);
+  --color-mauve-border-hover: var(--mauve-8);
+  --color-mauve-solid: var(--mauve-9);
+  --color-mauve-solid-hover: var(--mauve-10);
+  --color-mauve-low-contrast: var(--mauve-11);
+  --color-mauve-high-contrast: var(--mauve-12);
+}

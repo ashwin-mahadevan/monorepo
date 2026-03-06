@@ -1,0 +1,36 @@
+[tools]
+node = "25.8.0"
+pnpm = "10.30.3"
+
+[tasks.install]
+run = "pnpm install --frozen-lockfile"
+
+[tasks.build]
+run = "pnpm build"
+
+[tasks.typecheck]
+run = "pnpm typecheck"
+
+[tasks.format]
+run = "pnpm format"
+
+[tasks."format:check"]
+run = "pnpm format:check"
+
+[tasks.lint]
+run = "pnpm lint"
+
+[tasks."lint:check"]
+run = "pnpm lint:check"
+
+[tasks.check]
+run = "pnpm check"
+
+[tasks."dev:binance-archive"]
+run = "pnpm --filter @firm/binance-archive dev"
+
+[tasks."dev:kalshi-trades"]
+run = "pnpm --filter @firm/kalshi-trades dev"
+
+[tasks."dev:kalshi-orderbooks"]
+run = "pnpm --filter @firm/kalshi-orderbooks dev"

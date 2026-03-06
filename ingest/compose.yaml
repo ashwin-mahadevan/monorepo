@@ -1,0 +1,42 @@
+services:
+  kalshi-orderbooks:
+    image: ghcr.io/ashwin-mahadevan/monorepo/kalshi/orderbooks:${IMAGE_TAG:-latest}
+    build:
+      context: ..
+      dockerfile: ingest/kalshi/orderbooks/Dockerfile
+    init: true
+    restart: unless-stopped
+    environment:
+      KALSHI_ID: ${KALSHI_ID:?required}
+      KALSHI_KEY: ${KALSHI_KEY:?required}
+      KALSHI_INGEST_DIR: /data
+      NODE_ENV: production
+    volumes:
+      - ${DATA_DIR:?required}/ingest/kalshi/orderbooks:/data
+
+  kalshi-trades:
+    image: ghcr.io/ashwin-mahadevan/monorepo/kalshi/trades:${IMAGE_TAG:-latest}
+    build:
+      context: ..
+      dockerfile: ingest/kalshi/trades/Dockerfile
+    init: true
+    restart: on-failure
+    environment:
+      KALSHI_TRADES_DIR: /data
+      NODE_ENV: production
+    volumes:
+      - ${DATA_DIR:?required}/ingest/kalshi/trades:/data
+
+  binance-archive:
+    image: ghcr.io/ashwin-mahadevan/monorepo/binance/archive:${IMAGE_TAG:-latest}
+    build:
+      context: ..
+      dockerfile: ingest/binance/archive/Dockerfile
+    init: true
+    restart: on-failure
+    environment:
+      BINANCE_INGEST_DIR: /data
+      CURL_CONCURRENCY: ${CURL_CONCURRENCY:-16}
+      NODE_ENV: production
+    volumes:
+      - ${DATA_DIR:?required}/ingest/binance:/data

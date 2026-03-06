@@ -1,0 +1,16 @@
+{
+  "name": "@firm/common",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./env": "./dist/env.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0"
+  }
+}

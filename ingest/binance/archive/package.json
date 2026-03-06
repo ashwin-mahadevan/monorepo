@@ -1,0 +1,19 @@
+{
+  "name": "@firm/binance-archive",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsx src/main.ts",
+    "start": "node dist/main.js"
+  },
+  "dependencies": {
+    "@firm/common": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.2"
+  }
+}

@@ -1,0 +1,15 @@
+[tools]
+node = "25.8.0"
+pnpm = "10.30.3"
+
+[tasks.install]
+run = "pnpm install --frozen-lockfile"
+
+[tasks.dev]
+run = "pnpm --filter web dev"
+
+[tasks.build]
+run = "pnpm --filter web build"
+
+[tasks.lint]
+run = "pnpm --filter web lint"
