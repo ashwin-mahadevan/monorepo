@@ -1,5 +1,17 @@
 experimental_monorepo_root = true
 
+[env]
+_.file = ".env"
+
 [settings]
 experimental = true
 python.uv_venv_auto = "create|source"
+
+[monorepo]
+config_roots = [
+	"agents",
+	"binance-modeling",
+	"ingest",
+	"kalshi-trading",
+	"portfolio",
+]
