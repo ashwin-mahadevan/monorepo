@@ -1,0 +1,36 @@
+#cloud-config
+users:
+  - name: trading
+    shell: /bin/bash
+    groups: [docker]
+    ssh_authorized_keys:
+      - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJCvdfaE5gwM42Ju1Y6Kec622S1EUaWCNS5uAA98PLCl"
+
+apt:
+  sources:
+    docker:
+      source: "deb [arch=amd64] https://download.docker.com/linux/ubuntu noble stable"
+      keyid: 0EBFCD88
+      keyserver: keyserver.ubuntu.com
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - ca-certificates
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-buildx-plugin
+  - docker-compose-plugin
+
+runcmd:
+  - chown -R trading:trading /home/trading
+
+final_message: "`cloud-init` completed successfully."
+
+power_state:
+  mode: reboot
+  message: "Rebooting after cloud-init setup."
+  timeout: 30
+  condition: true

@@ -1,9 +1,8 @@
 #cloud-config
 users:
-  - name: deploy
+  - name: ingest
     shell: /bin/bash
-    groups: [sudo, docker]
-    sudo: ["ALL=(ALL) NOPASSWD:ALL"]
+    groups: [docker]
     ssh_authorized_keys:
       - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJCvdfaE5gwM42Ju1Y6Kec622S1EUaWCNS5uAA98PLCl"
 
@@ -32,12 +31,12 @@ fs_setup:
     overwrite: false
 
 mounts:
-  - ["/dev/disk/by-id/scsi-0HC_Volume_104640663", "/home/deploy/data/ingest", "ext4", "defaults,nofail", "0", "2"]
+  - ["/dev/disk/by-id/scsi-0HC_Volume_104640663", "/home/ingest/data", "ext4", "defaults,nofail", "0", "2"]
 
 runcmd:
-  - chown -R deploy:deploy /home/deploy
-  - mkdir -p /home/deploy/data/ingest/kalshi
-  - mkdir -p /home/deploy/data/ingest/binance
+  - chown -R ingest:ingest /home/ingest
+  - mkdir -p /home/ingest/data/kalshi
+  - mkdir -p /home/ingest/data/binance
 
 final_message: "`cloud-init` completed successfully."
 
