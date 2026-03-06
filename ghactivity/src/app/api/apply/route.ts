@@ -3,7 +3,7 @@ import { getSessionUser } from "@/lib/session";
 import { applyArt, getOrCreateRepo } from "@/lib/github";
 import { getCommitDates, PRESET_PATTERN } from "@/lib/art";
 
-const REPO_NAME = "ghactivity-art";
+const REPO_NAME = "ghactivity";
 
 export async function POST() {
   const user = await getSessionUser();

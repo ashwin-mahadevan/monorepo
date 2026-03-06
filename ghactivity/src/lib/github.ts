@@ -127,7 +127,7 @@ export async function getOrCreateRepo(
     body: JSON.stringify({
       name: repoName,
       auto_init: true,
-      private: false,
+      private: true,
       description: "GitHub contribution graph art by ghactivity",
     }),
   });
