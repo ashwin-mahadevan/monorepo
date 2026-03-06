@@ -41,6 +41,77 @@ async function ghFetch(
   });
 }
 
+// GitHub contribution level → intensity index (0-4)
+export type ContributionLevel =
+  | "NONE"
+  | "FIRST_QUARTILE"
+  | "SECOND_QUARTILE"
+  | "THIRD_QUARTILE"
+  | "FOURTH_QUARTILE";
+
+/** 7 rows (Sun–Sat) × 52 cols (weeks), each cell is 0–4 intensity. */
+export type ContributionGrid = number[][];
+
+export async function getContributionGraph(
+  token: string,
+  username: string,
+): Promise<ContributionGrid> {
+  const query = `query($login: String!) {
+    user(login: $login) {
+      contributionsCollection {
+        contributionCalendar {
+          weeks {
+            contributionDays {
+              contributionLevel
+              date
+            }
+          }
+        }
+      }
+    }
+  }`;
+
+  const res = await fetch("https://api.github.com/graphql", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ query, variables: { login: username } }),
+  });
+  if (!res.ok) throw new Error(`GraphQL request failed: ${res.status}`);
+
+  const json = await res.json();
+  const weeks =
+    json.data.user.contributionsCollection.contributionCalendar.weeks;
+
+  const levelMap: Record<ContributionLevel, number> = {
+    NONE: 0,
+    FIRST_QUARTILE: 1,
+    SECOND_QUARTILE: 2,
+    THIRD_QUARTILE: 3,
+    FOURTH_QUARTILE: 4,
+  };
+
+  // Build 7×52 grid (pad/trim to exactly 52 weeks)
+  const grid: number[][] = Array.from({ length: 7 }, () =>
+    Array<number>(52).fill(0),
+  );
+
+  const startWeek = Math.max(0, weeks.length - 52);
+  for (let wi = startWeek; wi < weeks.length; wi++) {
+    const col = wi - startWeek;
+    const days = weeks[wi].contributionDays;
+    for (const day of days) {
+      const d = new Date(day.date + "T00:00:00Z");
+      const row = d.getUTCDay();
+      grid[row][col] = levelMap[day.contributionLevel as ContributionLevel];
+    }
+  }
+
+  return grid;
+}
+
 export async function getOrCreateRepo(
   token: string,
   repoName: string,

@@ -1,9 +1,22 @@
 import { getSessionUser } from "@/lib/session";
+import { getContributionGraph } from "@/lib/github";
 import { ArtPreview } from "@/components/art-preview";
 import { ApplyButton, LogoutButton } from "./client";
 
 export default async function Home() {
   const user = await getSessionUser();
+
+  let contributions: number[][] | undefined;
+  if (user) {
+    try {
+      contributions = await getContributionGraph(
+        user.accessToken,
+        user.username,
+      );
+    } catch {
+      // Fall back to empty grid if fetch fails
+    }
+  }
 
   return (
     <div className="space-y-8">
@@ -29,7 +42,7 @@ export default async function Home() {
 
           <div>
             <h2 className="mb-3 text-lg font-semibold">Preview</h2>
-            <ArtPreview />
+            <ArtPreview contributions={contributions} />
           </div>
 
           <ApplyButton />

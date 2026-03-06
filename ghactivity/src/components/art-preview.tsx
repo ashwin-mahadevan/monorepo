@@ -2,11 +2,11 @@
 
 import { getCommitDates, PRESET_PATTERN } from "@/lib/art";
 
-// GitHub contribution graph colors (light theme / dark theme)
-const EMPTY_LIGHT = "#ebedf0";
-const EMPTY_DARK = "#161b22";
-const FILLED_LIGHT = "#40c463";
-const FILLED_DARK = "#39d353";
+// GitHub contribution graph colors by intensity level (0-4)
+// Light theme
+const COLORS_LIGHT = ["#ebedf0", "#9be9a8", "#40c463", "#30a14e", "#216e39"];
+// Dark theme
+const COLORS_DARK = ["#161b22", "#0e4429", "#006d32", "#26a641", "#39d353"];
 
 // GitHub only labels Mon, Wed, Fri
 const DAY_LABELS: (string | null)[] = [
@@ -45,7 +45,12 @@ const CELL_RADIUS = 2;
 const LABEL_WIDTH = 28;
 const HEADER_HEIGHT = 15;
 
-export function ArtPreview() {
+interface ArtPreviewProps {
+  /** Existing contribution grid: 7 rows × 52 cols, values 0-4. */
+  contributions?: number[][];
+}
+
+export function ArtPreview({ contributions }: ArtPreviewProps) {
   const months = getMonthLabels();
   const gridWidth = 52 * (CELL_SIZE + CELL_GAP);
   const gridHeight = 7 * (CELL_SIZE + CELL_GAP);
@@ -91,7 +96,11 @@ export function ArtPreview() {
         {/* Grid cells */}
         {Array.from({ length: 52 }, (_, col) =>
           Array.from({ length: 7 }, (_, row) => {
-            const active = PRESET_PATTERN[row][col];
+            const artActive = PRESET_PATTERN[row][col];
+            const existing = contributions?.[row]?.[col] ?? 0;
+            // Art overlay: use max intensity (4) for art cells, otherwise show existing
+            const level = artActive ? 4 : existing;
+
             return (
               <rect
                 key={`${col}-${row}`}
@@ -101,25 +110,22 @@ export function ArtPreview() {
                 height={CELL_SIZE}
                 rx={CELL_RADIUS}
                 ry={CELL_RADIUS}
-                className={
-                  active
-                    ? "gh-cell-filled"
-                    : "gh-cell-empty"
-                }
+                className={`gh-cell-${level}`}
               />
             );
           }),
         )}
 
         <style>{`
-          .gh-cell-empty { fill: ${EMPTY_LIGHT}; }
-          .gh-cell-filled { fill: ${FILLED_LIGHT}; }
+          ${COLORS_LIGHT.map((c, i) => `.gh-cell-${i} { fill: ${c}; }`).join("\n")}
           @media (prefers-color-scheme: dark) {
-            .gh-cell-empty { fill: ${EMPTY_DARK}; }
-            .gh-cell-filled { fill: ${FILLED_DARK}; }
+            ${COLORS_DARK.map((c, i) => `.gh-cell-${i} { fill: ${c}; }`).join("\n")}
           }
-          :root.dark .gh-cell-empty { fill: ${EMPTY_DARK}; }
-          :root.dark .gh-cell-filled { fill: ${FILLED_DARK}; }
+          :root.dark .gh-cell-0 { fill: ${COLORS_DARK[0]}; }
+          :root.dark .gh-cell-1 { fill: ${COLORS_DARK[1]}; }
+          :root.dark .gh-cell-2 { fill: ${COLORS_DARK[2]}; }
+          :root.dark .gh-cell-3 { fill: ${COLORS_DARK[3]}; }
+          :root.dark .gh-cell-4 { fill: ${COLORS_DARK[4]}; }
         `}</style>
       </svg>
     </div>
