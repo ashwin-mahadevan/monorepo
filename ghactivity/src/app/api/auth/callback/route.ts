@@ -70,5 +70,5 @@ export async function GET(request: NextRequest) {
   await createSession(userId);
 
   const baseUrl = process.env.NEXT_PUBLIC_URL ?? "http://localhost:3000";
-  return NextResponse.redirect(baseUrl);
+  return NextResponse.redirect(`${baseUrl}/${ghUser.login}`);
 }
