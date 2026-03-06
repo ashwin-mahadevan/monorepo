@@ -8,6 +8,9 @@ license = { text = "UNLICENSED" }
 dependencies = [
     "websockets>=14.0",
     "cryptography>=43.0",
+    "numpy>=2.0",
+    "scipy>=1.13",
+    "aiohttp>=3.9",
 ]
 
 [tool.uv]
@@ -28,4 +31,5 @@ strict_optional = true
 dev = [
   "mypy>=1.8",
   "ruff>=0.15.2",
+  "scipy-stubs>=1.17.0",
 ]
