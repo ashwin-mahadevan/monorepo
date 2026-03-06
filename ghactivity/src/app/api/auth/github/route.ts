@@ -7,7 +7,6 @@ export function GET() {
   const params = new URLSearchParams({
     client_id: clientId,
     redirect_uri: redirectUri,
-    scope: "repo",
   });
 
   return NextResponse.redirect(
