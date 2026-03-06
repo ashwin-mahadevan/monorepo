@@ -9,7 +9,7 @@ export default async function Home() {
     <div className="space-y-8">
       <div>
         <h1 className="text-4xl font-bold">ghactivity</h1>
-        <p className="mt-2 text-gray-400">
+        <p className="mt-2 text-gray-500 dark:text-gray-400">
           Draw pixel art on your GitHub contribution graph
         </p>
       </div>
@@ -37,7 +37,7 @@ export default async function Home() {
       ) : (
         <a
           href="/api/auth/github"
-          className="inline-block rounded-lg bg-gray-800 px-6 py-3 font-medium text-white transition hover:bg-gray-700"
+          className="inline-block rounded-lg bg-gray-200 px-6 py-3 font-medium text-gray-900 transition hover:bg-gray-300 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
         >
           Sign in with GitHub
         </a>

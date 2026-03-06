@@ -50,7 +50,7 @@ export function LogoutButton() {
     <form action="/api/logout" method="POST" className="ml-auto">
       <button
         type="submit"
-        className="text-sm text-gray-400 transition hover:text-gray-200"
+        className="text-sm text-gray-500 transition hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
       >
         Sign out
       </button>
