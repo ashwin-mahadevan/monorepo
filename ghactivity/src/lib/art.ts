@@ -1,43 +1,126 @@
 // Contribution graph: 52 weeks x 7 days, Sunday=0 at top
 // Pattern is [row (day of week)][col (week)] where true = commit
 
-// "HI" pattern (7 rows x ~20 cols, placed in the middle of the graph)
-// H = cols 0-4, I = cols 6-10
-const HI_PATTERN: boolean[][] = Array.from({ length: 7 }, () =>
-  Array<boolean>(52).fill(false),
-);
+export type PatternName = "hi" | "heart" | "wave" | "diamond" | "random";
 
-// H
-function setH(startCol: number) {
+function emptyGrid(): boolean[][] {
+  return Array.from({ length: 7 }, () => Array<boolean>(52).fill(false));
+}
+
+function makeHi(): boolean[][] {
+  const grid = emptyGrid();
+
+  // H: left/right verticals + middle bar
+  const startH = 20;
   for (let row = 0; row < 7; row++) {
-    HI_PATTERN[row][startCol] = true; // left vertical
-    HI_PATTERN[row][startCol + 4] = true; // right vertical
+    grid[row][startH] = true;
+    grid[row][startH + 4] = true;
     if (row === 3) {
-      // middle horizontal
-      HI_PATTERN[row][startCol + 1] = true;
-      HI_PATTERN[row][startCol + 2] = true;
-      HI_PATTERN[row][startCol + 3] = true;
+      grid[row][startH + 1] = true;
+      grid[row][startH + 2] = true;
+      grid[row][startH + 3] = true;
     }
   }
-}
 
-// I
-function setI(startCol: number) {
+  // I: center vertical + top/bottom bars
+  const startI = 27;
   for (let row = 0; row < 7; row++) {
-    HI_PATTERN[row][startCol + 2] = true; // center vertical
+    grid[row][startI + 2] = true;
   }
-  // top and bottom horizontal bars
   for (let c = 0; c < 5; c++) {
-    HI_PATTERN[0][startCol + c] = true;
-    HI_PATTERN[6][startCol + c] = true;
+    grid[0][startI + c] = true;
+    grid[6][startI + c] = true;
   }
+
+  return grid;
 }
 
-// Place "HI" roughly centered: start H at col 20, I at col 27
-setH(20);
-setI(27);
+function makeHeart(): boolean[][] {
+  const grid = emptyGrid();
 
-export const PRESET_PATTERN = HI_PATTERN;
+  // 9-col heart centered around col 25 (cols 21–29)
+  const heartShape = [
+    [0, 0, 1, 1, 0, 1, 1, 0, 0], // row 0: two bumps
+    [0, 1, 1, 1, 1, 1, 1, 1, 0], // row 1
+    [0, 1, 1, 1, 1, 1, 1, 1, 0], // row 2
+    [0, 0, 1, 1, 1, 1, 1, 0, 0], // row 3
+    [0, 0, 0, 1, 1, 1, 0, 0, 0], // row 4
+    [0, 0, 0, 0, 1, 0, 0, 0, 0], // row 5: tip
+    [0, 0, 0, 0, 0, 0, 0, 0, 0], // row 6: empty
+  ];
+
+  const startCol = 21;
+  for (let row = 0; row < 7; row++) {
+    for (let c = 0; c < 9; c++) {
+      if (heartShape[row][c]) {
+        grid[row][startCol + c] = true;
+      }
+    }
+  }
+
+  return grid;
+}
+
+function makeWave(): boolean[][] {
+  const grid = emptyGrid();
+
+  // 4-period sine wave across 52 cols; amplitude fills rows 0–6
+  for (let col = 0; col < 52; col++) {
+    const exact = 3 + 3 * Math.sin((col * 2 * Math.PI) / 13);
+    const r1 = Math.max(0, Math.min(6, Math.floor(exact)));
+    const r2 = Math.max(0, Math.min(6, Math.ceil(exact)));
+    grid[r1][col] = true;
+    grid[r2][col] = true;
+  }
+
+  return grid;
+}
+
+function makeDiamond(): boolean[][] {
+  const grid = emptyGrid();
+
+  // Four diamond outlines centered on row 3, spaced 13 cols apart
+  const centers: [number, number][] = [
+    [3, 8],
+    [3, 21],
+    [3, 34],
+    [3, 47],
+  ];
+  const radius = 3;
+
+  for (const [cr, cc] of centers) {
+    for (let row = 0; row < 7; row++) {
+      for (let col = 0; col < 52; col++) {
+        if (Math.abs(row - cr) + Math.abs(col - cc) === radius) {
+          grid[row][col] = true;
+        }
+      }
+    }
+  }
+
+  return grid;
+}
+
+export function generateRandom(): boolean[][] {
+  const grid = emptyGrid();
+  for (let col = 0; col < 52; col++) {
+    for (let row = 0; row < 7; row++) {
+      const isWeekend = row === 0 || row === 6;
+      grid[row][col] = Math.random() < (isWeekend ? 0.15 : 0.4);
+    }
+  }
+  return grid;
+}
+
+export const PATTERNS: Record<
+  Exclude<PatternName, "random">,
+  boolean[][]
+> = {
+  hi: makeHi(),
+  heart: makeHeart(),
+  wave: makeWave(),
+  diamond: makeDiamond(),
+};
 
 export function getCommitDates(pattern: boolean[][]): Date[] {
   const dates: Date[] = [];

@@ -9,13 +9,12 @@ run = "pnpm install --frozen-lockfile"
 run = """
 SESSION="ghactivity"
 if tmux has-session -t $SESSION 2>/dev/null; then
-  echo "Tmux session '$SESSION' already running."
-  echo "Connect with: tmux attach -t $SESSION"
+  tmux attach -t $SESSION
 else
   tmux new-session -d -s $SESSION "pnpm dlx @upstash/qstash-cli dev"
   tmux split-window -t $SESSION -h "pnpm dev"
   echo "Started tmux session '$SESSION' with qstash and nextjs side by side"
-  echo "Connect with: tmux attach -t $SESSION"
+  tmux attach -t $SESSION
 fi
 """
 
