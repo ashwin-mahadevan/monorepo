@@ -11,7 +11,7 @@ SESSION="ghactivity"
 if tmux has-session -t $SESSION 2>/dev/null; then
   tmux attach -t $SESSION
 else
-  docker compose -f ghactivity/docker-compose.yml up -d
+  docker compose -f docker-compose.yml up -d
   tmux new-session -d -s $SESSION "pnpm dlx @upstash/qstash-cli dev"
   tmux split-window -t $SESSION -h "pnpm dev"
   echo "Started tmux session '$SESSION' with qstash and nextjs side by side"
@@ -29,7 +29,7 @@ if tmux has-session -t $SESSION 2>/dev/null; then
 else
   echo "Tmux session '$SESSION' not running"
 fi
-docker compose -f ghactivity/docker-compose.yml down
+docker compose -f docker-compose.yml down
 """
 
 [tasks.build]
