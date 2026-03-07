@@ -9,14 +9,19 @@ run = "pnpm install --frozen-lockfile"
 run = """
 SESSION="ghactivity"
 if tmux has-session -t $SESSION 2>/dev/null; then
-  tmux attach -t $SESSION
+  echo "Tmux session '$SESSION' already running."
+  echo "Attach with: tmux attach -t $SESSION"
 else
   docker compose -f docker-compose.yml up -d
   tmux new-session -d -s $SESSION "pnpm dlx @upstash/qstash-cli dev"
   tmux split-window -t $SESSION -h "pnpm dev"
-  echo "Started tmux session '$SESSION' with qstash and nextjs side by side"
+  tmux split-window -t $SESSION:0.0 -v "docker compose logs -f redis"
+  tmux split-window -t $SESSION:0.1 -v "docker compose logs -f srh"
+  echo "Started tmux session '$SESSION' with 4 panes:"
+  echo "  Top-left: QStash CLI | Top-right: Next.js"
+  echo "  Bottom-left: Redis logs | Bottom-right: SRH logs"
+  echo "Attach with: tmux attach -t $SESSION"
   echo "Redis (SRH) running on http://localhost:8079"
-  tmux attach -t $SESSION
 fi
 """
 
