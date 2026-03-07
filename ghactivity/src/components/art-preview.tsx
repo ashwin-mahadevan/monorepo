@@ -57,6 +57,8 @@ interface ArtPreviewProps {
   onPatternChange: (p: boolean[][]) => void;
   /** Whether cells are clickable (custom mode). */
   editable: boolean;
+  /** Whether to show the art toggle checkbox and status badge (owner only). */
+  showArtControls?: boolean;
 }
 
 export function ArtPreview({
@@ -65,6 +67,7 @@ export function ArtPreview({
   pattern,
   onPatternChange,
   editable,
+  showArtControls = true,
 }: ArtPreviewProps) {
   const [showArt, setShowArt] = useState(true);
   const months = getMonthLabels();
@@ -80,29 +83,31 @@ export function ArtPreview({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-4">
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={showArt}
-            onChange={(e) => setShowArt(e.target.checked)}
-            className="accent-green-600"
-          />
-          <span className="text-gray-600 dark:text-gray-400">
-            Show art preview
+      {showArtControls && (
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={showArt}
+              onChange={(e) => setShowArt(e.target.checked)}
+              className="accent-green-600"
+            />
+            <span className="text-gray-600 dark:text-gray-400">
+              Show art preview
+            </span>
+          </label>
+          <span
+            className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+              artApplied
+                ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
+                : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
+            }`}
+          >
+            {artApplied ? "Art applied" : "Art not applied"}
           </span>
-        </label>
-        <span
-          className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-            artApplied
-              ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
-              : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
-          }`}
-        >
-          {artApplied ? "Art applied" : "Art not applied"}
-        </span>
-      </div>
-      <div className="overflow-x-auto">
+        </div>
+      )}
+      <div className="overflow-x-auto rounded-md border border-gray-200 p-3 dark:border-gray-700">
         <svg
           width={LABEL_WIDTH + gridWidth}
           height={HEADER_HEIGHT + gridHeight}

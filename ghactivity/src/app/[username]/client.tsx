@@ -18,12 +18,21 @@ const PATTERN_LABELS: { mode: Mode; label: string }[] = [
 interface DashboardProps {
   contributions?: number[][];
   artApplied?: boolean;
+  isOwner?: boolean;
 }
 
-export function Dashboard({ contributions, artApplied }: DashboardProps) {
+const EMPTY_PATTERN: boolean[][] = Array.from({ length: 7 }, () =>
+  Array<boolean>(52).fill(false),
+);
+
+export function Dashboard({
+  contributions,
+  artApplied,
+  isOwner = true,
+}: DashboardProps) {
   const [mode, setMode] = useState<Mode>("hi");
   const [pattern, setPattern] = useState<boolean[][]>(PATTERNS.hi);
-  const editable = mode === "custom";
+  const editable = isOwner && mode === "custom";
 
   function handleSelectMode(next: Mode) {
     setMode(next);
@@ -38,39 +47,44 @@ export function Dashboard({ contributions, artApplied }: DashboardProps) {
 
   return (
     <div className="space-y-6">
-      {/* Pattern selector */}
-      <div className="flex flex-wrap gap-2">
-        {PATTERN_LABELS.map(({ mode: m, label }) => (
-          <button
-            key={m}
-            onClick={() => handleSelectMode(m)}
-            className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
-              mode === m
-                ? "bg-green-600 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-            }`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      {/* Pattern selector — owner only */}
+      {isOwner && (
+        <div className="flex flex-wrap gap-2">
+          {PATTERN_LABELS.map(({ mode: m, label }) => (
+            <button
+              key={m}
+              onClick={() => handleSelectMode(m)}
+              className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
+                mode === m
+                  ? "bg-green-600 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Preview grid */}
       <div>
         <ArtPreview
           contributions={contributions}
-          artApplied={artApplied}
-          pattern={pattern}
+          artApplied={isOwner ? artApplied : undefined}
+          pattern={isOwner ? pattern : EMPTY_PATTERN}
           onPatternChange={setPattern}
           editable={editable}
+          showArtControls={isOwner}
         />
       </div>
 
-      {/* Action buttons */}
-      <div className="flex gap-4">
-        <ApplyButton pattern={pattern} />
-        <RemoveButton />
-      </div>
+      {/* Action buttons — owner only */}
+      {isOwner && (
+        <div className="flex gap-4">
+          <ApplyButton pattern={pattern} />
+          <RemoveButton />
+        </div>
+      )}
     </div>
   );
 }
@@ -174,6 +188,33 @@ function RemoveButton() {
         </p>
       )}
     </div>
+  );
+}
+
+export function YearSelect({
+  username,
+  availableYears,
+  selectedYear,
+}: {
+  username: string;
+  availableYears: number[];
+  selectedYear?: number;
+}) {
+  return (
+    <select
+      value={selectedYear ?? ""}
+      onChange={(e) => {
+        window.location.href = `/${username}?year=${e.target.value}`;
+      }}
+      className="rounded border border-gray-200 px-2 py-1 text-xs font-medium text-gray-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+    >
+      {!selectedYear && <option value="">Last year</option>}
+      {availableYears.map((y) => (
+        <option key={y} value={y}>
+          {y}
+        </option>
+      ))}
+    </select>
   );
 }
 

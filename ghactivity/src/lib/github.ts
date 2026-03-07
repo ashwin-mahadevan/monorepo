@@ -52,13 +52,35 @@ export type ContributionLevel =
 /** 7 rows (Sun–Sat) × 52 cols (weeks), each cell is 0–4 intensity. */
 export type ContributionGrid = number[][];
 
+export interface GitHubPublicUser {
+  login: string;
+  name: string | null;
+  bio: string | null;
+  avatar_url: string;
+  created_at: string;
+}
+
+export async function getPublicUser(
+  username: string,
+): Promise<GitHubPublicUser | null> {
+  const res = await fetch(`${API}/users/${username}`, {
+    headers: { Accept: "application/vnd.github+json" },
+    next: { revalidate: 300 },
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`GitHub public user fetch failed: ${res.status}`);
+  return res.json();
+}
+
 export async function getContributionGraph(
   token: string,
   username: string,
+  year?: number,
 ): Promise<ContributionGrid> {
-  const query = `query($login: String!) {
+  const hasYear = year !== undefined;
+  const query = `query($login: String!${hasYear ? ", $from: DateTime!, $to: DateTime!" : ""}) {
     user(login: $login) {
-      contributionsCollection {
+      contributionsCollection${hasYear ? "(from: $from, to: $to)" : ""} {
         contributionCalendar {
           weeks {
             contributionDays {
@@ -71,13 +93,19 @@ export async function getContributionGraph(
     }
   }`;
 
+  const variables: Record<string, string> = { login: username };
+  if (hasYear) {
+    variables.from = `${year}-01-01T00:00:00Z`;
+    variables.to = `${year}-12-31T23:59:59Z`;
+  }
+
   const res = await fetch("https://api.github.com/graphql", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ query, variables: { login: username } }),
+    body: JSON.stringify({ query, variables }),
   });
   if (!res.ok) throw new Error(`GraphQL request failed: ${res.status}`);
 
