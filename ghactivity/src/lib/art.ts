@@ -1,7 +1,13 @@
 // Contribution graph: 52 weeks x 7 days, Sunday=0 at top
 // Pattern is [row (day of week)][col (week)] where true = commit
 
-export type PatternName = "hi" | "heart" | "wave" | "diamond" | "random";
+export type PatternName =
+  | "hi"
+  | "heart"
+  | "wave"
+  | "diamond"
+  | "ghactivity"
+  | "random";
 
 function emptyGrid(): boolean[][] {
   return Array.from({ length: 7 }, () => Array<boolean>(52).fill(false));
@@ -101,6 +107,106 @@ function makeDiamond(): boolean[][] {
   return grid;
 }
 
+function makeGhactivity(): boolean[][] {
+  const grid = emptyGrid();
+
+  // 4×7 pixel font glyphs (4 cols wide, 7 rows tall), glyph[row][col].
+  const F = false;
+  const T = true;
+  const GLYPHS: Record<string, boolean[][]> = {
+    G: [
+      [F, T, T, T],
+      [T, F, F, F],
+      [T, F, F, F],
+      [T, F, T, T],
+      [T, F, F, T],
+      [T, F, F, T],
+      [F, T, T, T],
+    ],
+    H: [
+      [T, F, F, T],
+      [T, F, F, T],
+      [T, F, F, T],
+      [T, T, T, T],
+      [T, F, F, T],
+      [T, F, F, T],
+      [T, F, F, T],
+    ],
+    A: [
+      [F, T, T, F],
+      [T, F, F, T],
+      [T, F, F, T],
+      [T, T, T, T],
+      [T, F, F, T],
+      [T, F, F, T],
+      [T, F, F, T],
+    ],
+    C: [
+      [F, T, T, T],
+      [T, F, F, F],
+      [T, F, F, F],
+      [T, F, F, F],
+      [T, F, F, F],
+      [T, F, F, F],
+      [F, T, T, T],
+    ],
+    T: [
+      [T, T, T, T],
+      [F, T, T, F],
+      [F, T, T, F],
+      [F, T, T, F],
+      [F, T, T, F],
+      [F, T, T, F],
+      [F, T, T, F],
+    ],
+    I: [
+      [T, T, T, T],
+      [F, T, T, F],
+      [F, T, T, F],
+      [F, T, T, F],
+      [F, T, T, F],
+      [F, T, T, F],
+      [T, T, T, T],
+    ],
+    V: [
+      [T, F, F, T],
+      [T, F, F, T],
+      [T, F, F, T],
+      [T, F, F, T],
+      [T, F, F, T],
+      [F, T, T, F],
+      [F, T, T, F],
+    ],
+    Y: [
+      [T, F, F, T],
+      [T, F, F, T],
+      [F, T, T, F],
+      [F, T, T, F],
+      [F, T, T, F],
+      [F, T, T, F],
+      [F, T, T, F],
+    ],
+  };
+
+  // "GHACTIVITY" = 10 chars × (4 wide + 1 gap) − 1 = 49 cols.
+  // Center in 52: start at col 2, end at col 50.
+  let col = 2;
+  for (const char of "GHACTIVITY") {
+    const glyph = GLYPHS[char];
+    if (!glyph) continue;
+    for (let row = 0; row < 7; row++) {
+      for (let c = 0; c < 4; c++) {
+        if (glyph[row][c] && col + c < 52) {
+          grid[row][col + c] = true;
+        }
+      }
+    }
+    col += 5; // 4 wide + 1 gap
+  }
+
+  return grid;
+}
+
 export function generateRandom(): boolean[][] {
   const grid = emptyGrid();
   for (let col = 0; col < 52; col++) {
@@ -120,76 +226,8 @@ export const PATTERNS: Record<
   heart: makeHeart(),
   wave: makeWave(),
   diamond: makeDiamond(),
+  ghactivity: makeGhactivity(),
 };
-
-// 3×5 pixel font (3 cols wide, 5 rows tall) for watermark glyphs.
-// Each glyph is glyph[row][col], row 0 = top.
-const WATERMARK_FONT: Record<string, boolean[][]> = {
-  g: [
-    [true, true, true],
-    [true, false, false],
-    [true, true, true],
-    [false, false, true],
-    [true, true, true],
-  ],
-  h: [
-    [true, false, true],
-    [true, false, true],
-    [true, true, true],
-    [true, false, true],
-    [true, false, true],
-  ],
-  a: [
-    [false, true, false],
-    [true, false, true],
-    [true, true, true],
-    [true, false, true],
-    [true, false, true],
-  ],
-  c: [
-    [true, true, true],
-    [true, false, false],
-    [true, false, false],
-    [true, false, false],
-    [true, true, true],
-  ],
-  t: [
-    [true, true, true],
-    [false, true, false],
-    [false, true, false],
-    [false, true, false],
-    [false, true, false],
-  ],
-};
-
-// Watermark text rendered as lit cells in the contribution graph.
-// Placed at rows 1–5 (Mon–Fri), cols 33–51 (right side).
-const WATERMARK_TEXT = "ghact";
-const WATERMARK_ROW_START = 1;
-const WATERMARK_COL_START = 33;
-
-/** Returns a copy of pattern with the "ghact" watermark overlaid as lit cells. */
-export function addWatermark(pattern: boolean[][]): boolean[][] {
-  const grid = pattern.map((r) => [...r]);
-  let col = WATERMARK_COL_START;
-  for (const char of WATERMARK_TEXT) {
-    const glyph = WATERMARK_FONT[char];
-    if (!glyph) continue;
-    for (let r = 0; r < glyph.length; r++) {
-      for (let c = 0; c < glyph[r].length; c++) {
-        if (glyph[r][c]) {
-          const gridRow = WATERMARK_ROW_START + r;
-          const gridCol = col + c;
-          if (gridRow < 7 && gridCol < 52) {
-            grid[gridRow][gridCol] = true;
-          }
-        }
-      }
-    }
-    col += glyph[0].length + 1; // 3 wide + 1 gap
-  }
-  return grid;
-}
 
 export function getCommitDates(pattern: boolean[][]): Date[] {
   const dates: Date[] = [];

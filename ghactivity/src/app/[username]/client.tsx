@@ -11,6 +11,7 @@ const PATTERN_LABELS: { mode: Mode; label: string }[] = [
   { mode: "heart", label: "Heart" },
   { mode: "wave", label: "Wave" },
   { mode: "diamond", label: "Diamond" },
+  { mode: "ghactivity", label: "GHACTIVITY" },
   { mode: "random", label: "Random" },
   { mode: "custom", label: "Custom" },
 ];

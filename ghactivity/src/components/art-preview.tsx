@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { getCommitDates, addWatermark } from "@/lib/art";
+import { getCommitDates } from "@/lib/art";
 
 // GitHub contribution graph colors by intensity level (0-4)
 // Light theme
@@ -73,8 +73,6 @@ export function ArtPreview({
   const months = getMonthLabels();
   const gridWidth = 52 * (CELL_SIZE + CELL_GAP);
   const gridHeight = 7 * (CELL_SIZE + CELL_GAP);
-  const watermarked = addWatermark(pattern);
-
   function handleCellClick(row: number, col: number) {
     if (!editable) return;
     const next = pattern.map((r) => [...r]);
@@ -149,14 +147,8 @@ export function ArtPreview({
           {Array.from({ length: 52 }, (_, col) =>
             Array.from({ length: 7 }, (_, row) => {
               const isArtCell = pattern[row][col];
-              const isWatermarkCell = watermarked[row][col] && !isArtCell;
               const existing = contributions?.[row]?.[col] ?? 0;
-              const level =
-                isArtCell || isWatermarkCell
-                  ? showArt
-                    ? 4
-                    : 0
-                  : existing;
+              const level = isArtCell ? (showArt ? 4 : 0) : existing;
 
               return (
                 <rect
@@ -167,7 +159,7 @@ export function ArtPreview({
                   height={CELL_SIZE}
                   rx={CELL_RADIUS}
                   ry={CELL_RADIUS}
-                  className={`gh-cell-${level}${editable && !isWatermarkCell ? " gh-cell-editable" : ""}`}
+                  className={`gh-cell-${level}${editable ? " gh-cell-editable" : ""}`}
                   onClick={() => handleCellClick(row, col)}
                 />
               );
