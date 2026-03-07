@@ -122,6 +122,75 @@ export const PATTERNS: Record<
   diamond: makeDiamond(),
 };
 
+// 3×5 pixel font (3 cols wide, 5 rows tall) for watermark glyphs.
+// Each glyph is glyph[row][col], row 0 = top.
+const WATERMARK_FONT: Record<string, boolean[][]> = {
+  g: [
+    [true, true, true],
+    [true, false, false],
+    [true, true, true],
+    [false, false, true],
+    [true, true, true],
+  ],
+  h: [
+    [true, false, true],
+    [true, false, true],
+    [true, true, true],
+    [true, false, true],
+    [true, false, true],
+  ],
+  a: [
+    [false, true, false],
+    [true, false, true],
+    [true, true, true],
+    [true, false, true],
+    [true, false, true],
+  ],
+  c: [
+    [true, true, true],
+    [true, false, false],
+    [true, false, false],
+    [true, false, false],
+    [true, true, true],
+  ],
+  t: [
+    [true, true, true],
+    [false, true, false],
+    [false, true, false],
+    [false, true, false],
+    [false, true, false],
+  ],
+};
+
+// Watermark text rendered as lit cells in the contribution graph.
+// Placed at rows 1–5 (Mon–Fri), cols 33–51 (right side).
+const WATERMARK_TEXT = "ghact";
+const WATERMARK_ROW_START = 1;
+const WATERMARK_COL_START = 33;
+
+/** Returns a copy of pattern with the "ghact" watermark overlaid as lit cells. */
+export function addWatermark(pattern: boolean[][]): boolean[][] {
+  const grid = pattern.map((r) => [...r]);
+  let col = WATERMARK_COL_START;
+  for (const char of WATERMARK_TEXT) {
+    const glyph = WATERMARK_FONT[char];
+    if (!glyph) continue;
+    for (let r = 0; r < glyph.length; r++) {
+      for (let c = 0; c < glyph[r].length; c++) {
+        if (glyph[r][c]) {
+          const gridRow = WATERMARK_ROW_START + r;
+          const gridCol = col + c;
+          if (gridRow < 7 && gridCol < 52) {
+            grid[gridRow][gridCol] = true;
+          }
+        }
+      }
+    }
+    col += glyph[0].length + 1; // 3 wide + 1 gap
+  }
+  return grid;
+}
+
 export function getCommitDates(pattern: boolean[][]): Date[] {
   const dates: Date[] = [];
 

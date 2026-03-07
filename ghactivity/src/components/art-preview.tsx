@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { getCommitDates } from "@/lib/art";
+import { getCommitDates, addWatermark } from "@/lib/art";
 
 // GitHub contribution graph colors by intensity level (0-4)
 // Light theme
@@ -45,7 +45,6 @@ const CELL_GAP = 3;
 const CELL_RADIUS = 2;
 const LABEL_WIDTH = 28;
 const HEADER_HEIGHT = 15;
-const WATERMARK_HEIGHT = 14;
 
 interface ArtPreviewProps {
   /** Existing contribution grid: 7 rows × 52 cols, values 0-4. */
@@ -74,6 +73,7 @@ export function ArtPreview({
   const months = getMonthLabels();
   const gridWidth = 52 * (CELL_SIZE + CELL_GAP);
   const gridHeight = 7 * (CELL_SIZE + CELL_GAP);
+  const watermarked = addWatermark(pattern);
 
   function handleCellClick(row: number, col: number) {
     if (!editable) return;
@@ -111,7 +111,7 @@ export function ArtPreview({
       <div className="overflow-x-auto rounded-md border border-gray-200 p-3 dark:border-gray-700">
         <svg
           width={LABEL_WIDTH + gridWidth}
-          height={HEADER_HEIGHT + gridHeight + WATERMARK_HEIGHT}
+          height={HEADER_HEIGHT + gridHeight}
           className="block"
         >
           {/* Month labels */}
@@ -149,8 +149,14 @@ export function ArtPreview({
           {Array.from({ length: 52 }, (_, col) =>
             Array.from({ length: 7 }, (_, row) => {
               const isArtCell = pattern[row][col];
+              const isWatermarkCell = watermarked[row][col] && !isArtCell;
               const existing = contributions?.[row]?.[col] ?? 0;
-              const level = isArtCell ? (showArt ? 4 : 0) : existing;
+              const level =
+                isArtCell || isWatermarkCell
+                  ? showArt
+                    ? 4
+                    : 0
+                  : existing;
 
               return (
                 <rect
@@ -161,29 +167,14 @@ export function ArtPreview({
                   height={CELL_SIZE}
                   rx={CELL_RADIUS}
                   ry={CELL_RADIUS}
-                  className={`gh-cell-${level}${editable ? " gh-cell-editable" : ""}`}
+                  className={`gh-cell-${level}${editable && !isWatermarkCell ? " gh-cell-editable" : ""}`}
                   onClick={() => handleCellClick(row, col)}
                 />
               );
             }),
           )}
 
-          {/* Watermark */}
-          <text
-            x={LABEL_WIDTH + gridWidth}
-            y={HEADER_HEIGHT + gridHeight + WATERMARK_HEIGHT - 3}
-            textAnchor="end"
-            fontSize={8}
-            fontFamily="system-ui, sans-serif"
-            className="gh-watermark"
-          >
-            ghactivity.com
-          </text>
-
           <style>{`
-            .gh-watermark { fill: #d1d5db; }
-            @media (prefers-color-scheme: dark) { .gh-watermark { fill: #4b5563; } }
-            :root.dark .gh-watermark { fill: #4b5563; }
             ${COLORS_LIGHT.map((c, i) => `.gh-cell-${i} { fill: ${c}; }`).join("\n")}
             @media (prefers-color-scheme: dark) {
               ${COLORS_DARK.map((c, i) => `.gh-cell-${i} { fill: ${c}; }`).join("\n")}

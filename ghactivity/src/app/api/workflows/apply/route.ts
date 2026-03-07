@@ -1,6 +1,6 @@
 import { serve } from "@upstash/workflow/nextjs";
 import { getOrCreateRepo, applyArt } from "@/lib/github";
-import { getCommitDates } from "@/lib/art";
+import { getCommitDates, addWatermark } from "@/lib/art";
 
 interface ApplyPayload {
   accessToken: string;
@@ -15,7 +15,7 @@ export const { POST } = serve<ApplyPayload>(async (context) => {
   );
 
   const dates = await context.run("compute-dates", () =>
-    getCommitDates(pattern).map((d) => d.toISOString()),
+    getCommitDates(addWatermark(pattern)).map((d) => d.toISOString()),
   );
 
   await context.run("apply-art", () =>
