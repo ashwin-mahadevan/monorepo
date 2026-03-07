@@ -15,8 +15,8 @@ else
   docker compose -f docker-compose.yml up -d
   tmux new-session -d -s $SESSION "pnpm dlx @upstash/qstash-cli dev"
   tmux split-window -t $SESSION -h "pnpm dev"
-  tmux split-window -t $SESSION:0.0 -v "docker compose logs -f redis"
   tmux split-window -t $SESSION:0.1 -v "docker compose logs -f srh"
+  tmux split-window -t $SESSION:0.0 -v "docker compose logs -f redis"
   echo "Started tmux session '$SESSION' with 4 panes:"
   echo "  Top-left: QStash CLI | Top-right: Next.js"
   echo "  Bottom-left: Redis logs | Bottom-right: SRH logs"
