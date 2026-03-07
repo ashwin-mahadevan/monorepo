@@ -1,7 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { eq } from "drizzle-orm";
-import { db } from "@/lib/db";
-import { users } from "@/db/schema";
+import { redis } from "@/lib/redis";
 import { createSession } from "@/lib/session";
 import { getUser } from "@/lib/github";
 
@@ -38,33 +36,31 @@ export async function GET(request: NextRequest) {
   // Fetch GitHub user
   const ghUser = await getUser(accessToken);
 
-  // Upsert user in DB
-  const existing = await db.query.users.findFirst({
-    where: eq(users.githubId, ghUser.id),
-  });
-
+  // Upsert user in Redis
+  const githubIndexKey = `gha:github:${ghUser.id}`;
   let userId: number;
-  if (existing) {
-    await db
-      .update(users)
-      .set({
-        username: ghUser.login,
-        avatarUrl: ghUser.avatar_url,
-        accessToken,
-      })
-      .where(eq(users.githubId, ghUser.id));
-    userId = existing.id;
+
+  const existingUserId = await redis.get<string>(githubIndexKey);
+
+  if (existingUserId) {
+    // Update mutable fields on existing user
+    userId = Number(existingUserId);
+    await redis.hset(`gha:user:${userId}`, {
+      username: ghUser.login,
+      avatarUrl: ghUser.avatar_url,
+      accessToken,
+    });
   } else {
-    const [inserted] = await db
-      .insert(users)
-      .values({
-        githubId: ghUser.id,
-        username: ghUser.login,
-        avatarUrl: ghUser.avatar_url,
-        accessToken,
-      })
-      .returning({ id: users.id });
-    userId = inserted.id;
+    // Insert new user: allocate ID, write hash, write index
+    userId = await redis.incr("gha:user:seq");
+    await redis.hset(`gha:user:${userId}`, {
+      githubId: String(ghUser.id),
+      username: ghUser.login,
+      avatarUrl: ghUser.avatar_url,
+      accessToken,
+      createdAt: new Date().toISOString(),
+    });
+    await redis.set(githubIndexKey, String(userId));
   }
 
   await createSession(userId);

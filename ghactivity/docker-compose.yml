@@ -1,0 +1,16 @@
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  srh:
+    image: hiett/serverless-redis-http:latest
+    restart: unless-stopped
+    ports:
+      - "8079:80"
+    environment:
+      SRH_MODE: env
+      SRH_TOKEN: local_token
+      SRH_CONNECTION_STRING: "redis://redis:6379"
+    depends_on:
+      - redis
