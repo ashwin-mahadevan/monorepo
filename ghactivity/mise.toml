@@ -12,7 +12,7 @@ if tmux has-session -t $SESSION 2>/dev/null; then
   echo "Tmux session '$SESSION' already running."
   echo "Connect with: tmux attach -t $SESSION"
 else
-  tmux new-session -d -s $SESSION -n qstash "pnpm exec qstash dev"
+  tmux new-session -d -s $SESSION -n qstash "pnpm dlx @upstash/qstash-cli dev"
   tmux new-window -t $SESSION -n nextjs "pnpm dev"
   echo "Started tmux session '$SESSION' with qstash and nextjs"
   echo "Connect with: tmux attach -t $SESSION"
