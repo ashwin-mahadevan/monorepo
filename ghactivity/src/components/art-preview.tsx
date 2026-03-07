@@ -45,6 +45,7 @@ const CELL_GAP = 3;
 const CELL_RADIUS = 2;
 const LABEL_WIDTH = 28;
 const HEADER_HEIGHT = 15;
+const WATERMARK_HEIGHT = 14;
 
 interface ArtPreviewProps {
   /** Existing contribution grid: 7 rows × 52 cols, values 0-4. */
@@ -110,7 +111,7 @@ export function ArtPreview({
       <div className="overflow-x-auto rounded-md border border-gray-200 p-3 dark:border-gray-700">
         <svg
           width={LABEL_WIDTH + gridWidth}
-          height={HEADER_HEIGHT + gridHeight}
+          height={HEADER_HEIGHT + gridHeight + WATERMARK_HEIGHT}
           className="block"
         >
           {/* Month labels */}
@@ -167,7 +168,22 @@ export function ArtPreview({
             }),
           )}
 
+          {/* Watermark */}
+          <text
+            x={LABEL_WIDTH + gridWidth}
+            y={HEADER_HEIGHT + gridHeight + WATERMARK_HEIGHT - 3}
+            textAnchor="end"
+            fontSize={8}
+            fontFamily="system-ui, sans-serif"
+            className="gh-watermark"
+          >
+            ghactivity.com
+          </text>
+
           <style>{`
+            .gh-watermark { fill: #d1d5db; }
+            @media (prefers-color-scheme: dark) { .gh-watermark { fill: #4b5563; } }
+            :root.dark .gh-watermark { fill: #4b5563; }
             ${COLORS_LIGHT.map((c, i) => `.gh-cell-${i} { fill: ${c}; }`).join("\n")}
             @media (prefers-color-scheme: dark) {
               ${COLORS_DARK.map((c, i) => `.gh-cell-${i} { fill: ${c}; }`).join("\n")}

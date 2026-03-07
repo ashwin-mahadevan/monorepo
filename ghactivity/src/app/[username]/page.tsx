@@ -50,7 +50,7 @@ export default async function UserPage({
   }
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto max-w-4xl space-y-8 px-6 py-12">
       {/* Profile header */}
       <div className="flex items-start gap-5">
         <a

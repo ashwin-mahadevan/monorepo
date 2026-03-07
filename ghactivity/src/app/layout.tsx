@@ -13,7 +13,7 @@ export default function RootLayout(props: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100">
         <ThemeProvider>
-          <main className="mx-auto max-w-4xl px-4 py-12">
+          <main>
             {props.children}
           </main>
         </ThemeProvider>
