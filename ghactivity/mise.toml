@@ -5,7 +5,7 @@ pnpm = "10.30.3"
 [tasks.install]
 run = "pnpm install --frozen-lockfile"
 
-[tasks.dev]
+[tasks."dev:start"]
 run = """
 SESSION="ghactivity"
 if tmux has-session -t $SESSION 2>/dev/null; then
@@ -16,6 +16,17 @@ else
   tmux split-window -t $SESSION -h "pnpm dev"
   echo "Started tmux session '$SESSION' with qstash and nextjs side by side"
   echo "Connect with: tmux attach -t $SESSION"
+fi
+"""
+
+[tasks."dev:stop"]
+run = """
+SESSION="ghactivity"
+if tmux has-session -t $SESSION 2>/dev/null; then
+  tmux kill-session -t $SESSION
+  echo "Killed tmux session '$SESSION'"
+else
+  echo "Tmux session '$SESSION' not running"
 fi
 """
 
