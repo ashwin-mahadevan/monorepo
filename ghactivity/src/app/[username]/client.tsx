@@ -202,13 +202,13 @@ export function YearSelect({
 }) {
   return (
     <select
-      value={selectedYear ?? ""}
+      value={selectedYear ?? "last"}
       onChange={(e) => {
         window.location.href = `/${username}?year=${e.target.value}`;
       }}
       className="rounded border border-gray-200 px-2 py-1 text-xs font-medium text-gray-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
     >
-      {!selectedYear && <option value="">Last year</option>}
+      <option value="last">Last year</option>
       {availableYears.map((y) => (
         <option key={y} value={y}>
           {y}

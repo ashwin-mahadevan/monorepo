@@ -12,7 +12,8 @@ export default async function UserPage({
 }) {
   const { username } = await params;
   const { year: yearStr } = await searchParams;
-  const year = yearStr ? parseInt(yearStr) : undefined;
+  const year =
+    yearStr && yearStr !== "last" ? parseInt(yearStr) : undefined;
 
   const [sessionUser, ghProfile] = await Promise.all([
     getSessionUser(),
